@@ -1,13 +1,28 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Jul 23 16:44:19 2025
+
+@author: hastika
+"""
+# Load reference data
 
 import streamlit as st
 import pandas as pd
 
 # Load postal code reference data
+# Load reference data
 @st.cache_data
 def load_reference_data():
     df = pd.read_excel("postal_code_information_FULL.xlsx")
-    df['Postal Code'] = df['Postal Code'].astype(str).str.strip()
+    df['Postal Code'] = (
+        df['Postal Code']
+        .astype(str)
+        .str.strip()
+        .str.replace(".0", "", regex=False)
+        .str.zfill(6)
+    )
     return df
+
 
 postal_df = load_reference_data()
 
@@ -19,13 +34,7 @@ st.header("🔎 Manual Postal Code Lookup")
 postal_input = st.text_input("Enter a postal code (e.g. 510301):")
 
 if postal_input:
-    postal_input = postal_input.strip()
-    match = postal_df[postal_df['Postal Code'] == postal_input]
-    if not match.empty:
-        region = match.iloc[0]['Region']
-        st.success(f"Region: {region}")
-    else:
-        st.error("Postal code not found in reference data.")
+    postal_input = postal_input.strip().replace(".0", "").zfill(6)
 
 # --- File Upload ---
 st.header("📁 Batch Lookup via Excel File")
